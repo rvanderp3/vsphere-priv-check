@@ -38,7 +38,15 @@ vSphere object: vSphere vCenter Datacenter
 Resource.AssignVMToPool, VApp.Import, VirtualMachine.Config.AddExistingDisk, VirtualMachine.Config.AddNewDisk, VirtualMachine.Config.AddRemoveDevice, VirtualMachine.Config.AdvancedConfig, VirtualMachine.Config.Annotation, VirtualMachine.Config.CPUCount, VirtualMachine.Config.DiskExtend, VirtualMachine.Config.DiskLease, VirtualMachine.Config.EditDevice, VirtualMachine.Config.Memory, VirtualMachine.Config.RemoveDisk, VirtualMachine.Config.Rename, VirtualMachine.Config.ResetGuestInfo, VirtualMachine.Config.Resource, VirtualMachine.Config.Settings, VirtualMachine.Config.UpgradeVirtualHardware, VirtualMachine.Interact.GuestControl, VirtualMachine.Interact.PowerOff, VirtualMachine.Interact.PowerOn, VirtualMachine.Interact.Reset, VirtualMachine.Inventory.Create, VirtualMachine.Inventory.CreateFromExisting, VirtualMachine.Inventory.Delete, VirtualMachine.Provisioning.Clone, Folder.Create, Folder.Delete
 ~~~
 
-## Missing Checks
+### Checking Folder Permissions
 
+Checking user privileges on a folder can be a bit tough as privileges can't be validated until the folder is created.  Additionally, privileges to create a folder are provided by the [vSphere vCenter Datacenter](https://docs.openshift.com/container-platform/latest/installing/installing_vsphere/installing-vsphere-installer-provisioned.html#installation-vsphere-installer-infra-requirements-account_installing-vsphere-installer-provisioned).
+
+If a preexisting folder is being checked(i.e. installing in to an existing folder, creating a UPI machineset which creates machines in a specific folder), the folder can be checked by running:
+
+~~~
+./bin/vsphere-priv-check --check-folder=vcentertest-24lrs
+~~~
+
+## Missing Checks
 - Privilege Propagation
-- Virtual Machine Folder

@@ -35,8 +35,9 @@ func ComparePrivileges(derived []types.UserPrivilegeResult, required []string) e
 	return nil
 }
 
-func ValidatePrivileges(ssn *Session, p *pctypes.Platform) error {
+func ValidatePrivileges(ssn *Session, p *pctypes.Platform, folder string) error {
 	ctx := context.TODO()
+	var missingPrivileges = ""
 	authManager := object.NewAuthorizationManager(ssn.Vim25Client)
 
 	finder := find.NewFinder(ssn.Vim25Client)
@@ -52,8 +53,7 @@ func ValidatePrivileges(ssn *Session, p *pctypes.Platform) error {
 		}
 		err = ComparePrivileges(res, val.Privileges)
 		if err != nil {
-			out := fmt.Sprintf("*** Missing Privileges ***\nvSphere object: %s\n%s\n", val.Name, err.Error())
-			return errors.New(out)
+			missingPrivileges = missingPrivileges + fmt.Sprintf("*** Missing Privileges ***\nvSphere object: %s\n%s\n\n", val.Name, err.Error())
 		}
 	}
 
@@ -75,8 +75,7 @@ func ValidatePrivileges(ssn *Session, p *pctypes.Platform) error {
 		}
 		err = ComparePrivileges(res, val.Privileges)
 		if err != nil {
-			out := fmt.Sprintf("*** Missing Privileges ***\nvSphere object: %s\n%s\n", val.Name, err.Error())
-			return errors.New(out)
+			missingPrivileges = missingPrivileges + fmt.Sprintf("*** Missing Privileges ***\nvSphere object: %s\n%s\n\n", val.Name, err.Error())
 		}
 	}
 
@@ -91,8 +90,7 @@ func ValidatePrivileges(ssn *Session, p *pctypes.Platform) error {
 		}
 		err = ComparePrivileges(res, val.Privileges)
 		if err != nil {
-			out := fmt.Sprintf("*** Missing Privileges ***\nvSphere object: %s\n%s\n", val.Name, err.Error())
-			return errors.New(out)
+			missingPrivileges = missingPrivileges + fmt.Sprintf("*** Missing Privileges ***\nvSphere object: %s\n%s\n\n", val.Name, err.Error())
 		}
 	}
 
@@ -107,8 +105,7 @@ func ValidatePrivileges(ssn *Session, p *pctypes.Platform) error {
 		}
 		err = ComparePrivileges(res, val.Privileges)
 		if err != nil {
-			out := fmt.Sprintf("*** Missing Privileges ***\nvSphere object: %s\n%s\n", val.Name, err.Error())
-			return errors.New(out)
+			missingPrivileges = missingPrivileges + fmt.Sprintf("*** Missing Privileges ***\nvSphere object: %s\n%s\n\n", val.Name, err.Error())
 		}
 	}
 	if val, ok := permissions.RequiredPermissions["vCenter"]; ok {
@@ -119,9 +116,27 @@ func ValidatePrivileges(ssn *Session, p *pctypes.Platform) error {
 		}
 		err = ComparePrivileges(res, val.Privileges)
 		if err != nil {
-			out := fmt.Sprintf("*** Missing Privileges ***\nvSphere object: %s\n%s\n", val.Name, err.Error())
-			return errors.New(out)
+			missingPrivileges = missingPrivileges + fmt.Sprintf("*** Missing Privileges ***\nvSphere object: %s\n%s\n\n", val.Name, err.Error())
 		}
+	}
+	if folder != "" {
+		if val, ok := permissions.RequiredPermissions["Folder"]; ok {
+			folderObj, err := finder.Folder(ctx, folder)
+			if err != nil {
+				return err
+			}
+			res, err := authManager.FetchUserPrivilegeOnEntities(ctx, []types.ManagedObjectReference{folderObj.Reference()}, p.Username)
+			if err != nil {
+				return err
+			}
+			err = ComparePrivileges(res, val.Privileges)
+			if err != nil {
+				missingPrivileges = missingPrivileges + fmt.Sprintf("*** Missing Privileges ***\nvSphere object: %s\n%s\n\n", val.Name, err.Error())
+			}
+		}
+	}
+	if missingPrivileges != "" {
+		return errors.New(missingPrivileges)
 	}
 	return nil
 }
