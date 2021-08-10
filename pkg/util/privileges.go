@@ -111,10 +111,9 @@ func ValidatePrivileges(ssn *Session, p *pctypes.Platform) error {
 			return errors.New(out)
 		}
 	}
-	/*if val, ok := permissions.RequiredPermissions["vCenter"]; ok {
+	if val, ok := permissions.RequiredPermissions["vCenter"]; ok {
 		rootFolder := object.NewRootFolder(ssn.Vim25Client)
-
-		res, err := authManager.FetchUserPrivilegeOnEntities(ctx,[]types.ManagedObjectReference{rootFolder.Reference()},p.Username)
+		res, err := authManager.FetchUserPrivilegeOnEntities(ctx, []types.ManagedObjectReference{rootFolder.Reference()}, p.Username)
 		if err != nil {
 			return err
 		}
@@ -123,6 +122,6 @@ func ValidatePrivileges(ssn *Session, p *pctypes.Platform) error {
 			out := fmt.Sprintf("*** Missing Privileges ***\nvSphere object: %s\n%s\n", val.Name, err.Error())
 			return errors.New(out)
 		}
-	}*/
+	}
 	return nil
 }
