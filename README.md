@@ -42,7 +42,7 @@ Resource.AssignVMToPool, VApp.Import, VirtualMachine.Config.AddExistingDisk, Vir
 
 Checking user privileges on a folder can be a bit tough as privileges can't be validated until the folder is created.  Additionally, privileges to create a folder are provided by the [vSphere vCenter Datacenter](https://docs.openshift.com/container-platform/latest/installing/installing_vsphere/installing-vsphere-installer-provisioned.html#installation-vsphere-installer-infra-requirements-account_installing-vsphere-installer-provisioned).
 
-If a preexisting folder is being checked(i.e. installing in to an existing folder, creating a UPI machineset which creates machines in a specific folder), the folder can be checked by running:
+If privileges on a preexisting folder are to be checked(i.e. installing in to an existing folder, creating a UPI machineset which creates machines in an existing folder), the folder can be checked by running:
 
 ~~~
 ./bin/vsphere-priv-check --check-folder=vcentertest-24lrs
