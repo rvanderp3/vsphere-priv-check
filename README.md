@@ -48,5 +48,6 @@ If privileges on a preexisting folder are to be checked(i.e. installing in to an
 ./bin/vsphere-priv-check --check-folder=vcentertest-24lrs
 ~~~
 
-## Missing Checks
-- Privilege Propagation
+## TO-DO
+
+- Privilege propagation is currently not role aware.  Need to add logic to check roles for privilege propagation.  All other aspects of these checks are role aware as the vCenter API is doing the work of calculating available privileges.
