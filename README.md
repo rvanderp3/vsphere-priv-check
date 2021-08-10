@@ -41,5 +41,4 @@ Resource.AssignVMToPool, VApp.Import, VirtualMachine.Config.AddExistingDisk, Vir
 ## Missing Checks
 
 - Privilege Propagation
-- vSphere vCenter
 - Virtual Machine Folder
