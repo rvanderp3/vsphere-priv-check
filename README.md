@@ -26,7 +26,7 @@ The `install-config.yaml` to be used for the installation must be present in the
 To run the tool:
 
 ~~~
-$ ./bin/vsphere-perm-check
+$ ./bin/vsphere-priv-check
 OpenShift vSphere Pre-Flight Permissions Validator
 
 2021/08/10 13:39:41 checking permissions for user test@vsphere.local
