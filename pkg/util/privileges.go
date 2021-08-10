@@ -9,6 +9,7 @@ import (
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
+	"strings"
 )
 
 func ComparePrivileges(derived []types.UserPrivilegeResult, required []string) error {
@@ -35,9 +36,38 @@ func ComparePrivileges(derived []types.UserPrivilegeResult, required []string) e
 	return nil
 }
 
+func checkPropagationRequirement(ctx context.Context, authManager *object.AuthorizationManager, reference types.ManagedObjectReference, userName string) error {
+	userNameParts := strings.Split(userName, "@")
+	if len(userNameParts) < 2 {
+		return errors.New("username must contain user@domain")
+	}
+	var errorList = ""
+	principal := strings.ToUpper(userNameParts[1]) + "\\" + strings.ToLower(userNameParts[0])
+
+	roleList, err := authManager.RetrieveAllPermissions(ctx)
+	if err != nil {
+		return err
+	}
+	for _, permission := range roleList {
+		if permission.Entity.Reference() == reference {
+			if permission.Principal == principal {
+				if permission.Propagate == false {
+					errorList = errorList + "User: " + permission.Principal + " is not configured to propagate to children\n"
+				}
+			}
+		}
+	}
+
+	if errorList != "" {
+		return errors.New(errorList)
+	}
+	return nil
+}
+
 func ValidatePrivileges(ssn *Session, p *pctypes.Platform, folder string) error {
 	ctx := context.TODO()
-	var missingPrivileges = ""
+	var invalidPrivilegeConfiguration = ""
+
 	authManager := object.NewAuthorizationManager(ssn.Vim25Client)
 
 	finder := find.NewFinder(ssn.Vim25Client)
@@ -53,7 +83,13 @@ func ValidatePrivileges(ssn *Session, p *pctypes.Platform, folder string) error 
 		}
 		err = ComparePrivileges(res, val.Privileges)
 		if err != nil {
-			missingPrivileges = missingPrivileges + fmt.Sprintf("*** Missing Privileges ***\nvSphere object: %s\n%s\n\n", val.Name, err.Error())
+			invalidPrivilegeConfiguration = invalidPrivilegeConfiguration + fmt.Sprintf("*** Missing Privileges ***\nvSphere object: %s\n%s\n\n", val.Name, err.Error())
+		}
+		err = checkPropagationRequirement(ctx, authManager, datacenter.Reference(), p.Username)
+		if err != nil {
+			invalidPrivilegeConfiguration = invalidPrivilegeConfiguration + fmt.Sprintf("*** Invalid Propagation Configuration ***\n"+
+				"Note: Propagation only required if folder is created by openshift-install.\n"+
+				"vSphere object: %s\n%s\n\n", val.Name, err.Error())
 		}
 	}
 
@@ -75,7 +111,7 @@ func ValidatePrivileges(ssn *Session, p *pctypes.Platform, folder string) error 
 		}
 		err = ComparePrivileges(res, val.Privileges)
 		if err != nil {
-			missingPrivileges = missingPrivileges + fmt.Sprintf("*** Missing Privileges ***\nvSphere object: %s\n%s\n\n", val.Name, err.Error())
+			invalidPrivilegeConfiguration = invalidPrivilegeConfiguration + fmt.Sprintf("*** Missing Privileges ***\nvSphere object: %s\n%s\n\n", val.Name, err.Error())
 		}
 	}
 
@@ -90,7 +126,7 @@ func ValidatePrivileges(ssn *Session, p *pctypes.Platform, folder string) error 
 		}
 		err = ComparePrivileges(res, val.Privileges)
 		if err != nil {
-			missingPrivileges = missingPrivileges + fmt.Sprintf("*** Missing Privileges ***\nvSphere object: %s\n%s\n\n", val.Name, err.Error())
+			invalidPrivilegeConfiguration = invalidPrivilegeConfiguration + fmt.Sprintf("*** Missing Privileges ***\nvSphere object: %s\n%s\n\n", val.Name, err.Error())
 		}
 	}
 
@@ -105,7 +141,11 @@ func ValidatePrivileges(ssn *Session, p *pctypes.Platform, folder string) error 
 		}
 		err = ComparePrivileges(res, val.Privileges)
 		if err != nil {
-			missingPrivileges = missingPrivileges + fmt.Sprintf("*** Missing Privileges ***\nvSphere object: %s\n%s\n\n", val.Name, err.Error())
+			invalidPrivilegeConfiguration = invalidPrivilegeConfiguration + fmt.Sprintf("*** Missing Privileges ***\nvSphere object: %s\n%s\n\n", val.Name, err.Error())
+		}
+		err = checkPropagationRequirement(ctx, authManager, cluster.Reference(), p.Username)
+		if err != nil {
+			invalidPrivilegeConfiguration = invalidPrivilegeConfiguration + fmt.Sprintf("*** Invalid Propagation Configuration ***\nvSphere object: %s\n%s\n\n", val.Name, err.Error())
 		}
 	}
 	if val, ok := permissions.RequiredPermissions["vCenter"]; ok {
@@ -116,7 +156,7 @@ func ValidatePrivileges(ssn *Session, p *pctypes.Platform, folder string) error 
 		}
 		err = ComparePrivileges(res, val.Privileges)
 		if err != nil {
-			missingPrivileges = missingPrivileges + fmt.Sprintf("*** Missing Privileges ***\nvSphere object: %s\n%s\n\n", val.Name, err.Error())
+			invalidPrivilegeConfiguration = invalidPrivilegeConfiguration + fmt.Sprintf("*** Missing Privileges ***\nvSphere object: %s\n%s\n\n", val.Name, err.Error())
 		}
 	}
 	if folder != "" {
@@ -131,12 +171,16 @@ func ValidatePrivileges(ssn *Session, p *pctypes.Platform, folder string) error 
 			}
 			err = ComparePrivileges(res, val.Privileges)
 			if err != nil {
-				missingPrivileges = missingPrivileges + fmt.Sprintf("*** Missing Privileges ***\nvSphere object: %s\n%s\n\n", val.Name, err.Error())
+				invalidPrivilegeConfiguration = invalidPrivilegeConfiguration + fmt.Sprintf("*** Missing Privileges ***\nvSphere object: %s\n%s\n\n", val.Name, err.Error())
+			}
+			err = checkPropagationRequirement(ctx, authManager, folderObj.Reference(), p.Username)
+			if err != nil {
+				invalidPrivilegeConfiguration = invalidPrivilegeConfiguration + fmt.Sprintf("*** Invalid Propagation Configuration ***\nvSphere object: %s\n%s\n\n", val.Name, err.Error())
 			}
 		}
 	}
-	if missingPrivileges != "" {
-		return errors.New(missingPrivileges)
+	if invalidPrivilegeConfiguration != "" {
+		return errors.New(invalidPrivilegeConfiguration)
 	}
 	return nil
 }
