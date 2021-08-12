@@ -101,6 +101,11 @@ func ValidatePrivileges(ssn *Session, p *pctypes.Platform, folder string) error 
 			}
 			p.DefaultDatastore = ds.Name()
 		}
+		datacenter, err := finder.Datacenter(ctx, p.Datacenter)
+		if err != nil {
+			return err
+		}
+		finder.SetDatacenter(datacenter)
 		datastore, err := finder.Datastore(ctx, p.DefaultDatastore)
 		if err != nil {
 			return err

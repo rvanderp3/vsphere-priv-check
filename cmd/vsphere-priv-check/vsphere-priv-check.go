@@ -53,7 +53,7 @@ func runRootCmd(cmd *cobra.Command, args []string) {
 }
 
 func main() {
-	fmt.Printf("OpenShift vSphere Pre-Flight Permissions Validator\n\n")
+	fmt.Printf("OpenShift vSphere Pre-Flight Permissions Validator v1.1\n\n")
 	rootCmd := newRootCmd()
 	rootCmd.Execute()
 }
