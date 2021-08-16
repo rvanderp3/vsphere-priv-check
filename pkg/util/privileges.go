@@ -9,6 +9,7 @@ import (
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
+	"log"
 	"strings"
 )
 
@@ -121,10 +122,22 @@ func ValidatePrivileges(ssn *Session, p *pctypes.Platform, folder string) error 
 	}
 
 	if val, ok := permissions.RequiredPermissions["Port group"]; ok {
-		network, err := finder.Network(ctx, p.Network)
-		if err != nil {
-			return err
+		var network object.NetworkReference
+		if p.Network == "" {
+			log.Println("'network' not defined in install-config.yaml. attempting to use default network.")
+			_network, err := finder.DefaultNetwork(ctx)
+			if err != nil {
+				return err
+			}
+			network = _network
+		} else {
+			_network, err := finder.Network(ctx, p.Network)
+			if err != nil {
+				return err
+			}
+			network = _network
 		}
+
 		res, err := authManager.FetchUserPrivilegeOnEntities(ctx, []types.ManagedObjectReference{network.Reference()}, p.Username)
 		if err != nil {
 			return err
