@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/rvanderp/vsphere-priv-check/pkg/util"
+	"github.com/rvanderp3/vsphere-priv-check/pkg/util"
 	"github.com/spf13/cobra"
 	"log"
 	"os"

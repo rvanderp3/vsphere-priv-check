@@ -3,7 +3,7 @@ package util
 import (
 	"errors"
 	"github.com/mitchellh/mapstructure"
-	"github.com/rvanderp/vsphere-priv-check/pkg/types"
+	"github.com/rvanderp3/vsphere-priv-check/pkg/types"
 	"io/ioutil"
 	"sigs.k8s.io/yaml"
 )

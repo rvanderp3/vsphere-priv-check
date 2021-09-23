@@ -1,4 +1,4 @@
-module github.com/rvanderp/vsphere-priv-check
+module github.com/rvanderp3/vsphere-priv-check
 
 go 1.15
 

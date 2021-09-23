@@ -17,7 +17,7 @@ MODE="${MODE:-release}"
 GIT_COMMIT="${SOURCE_GIT_COMMIT:-$(git rev-parse --verify 'HEAD^{commit}')}"
 GIT_TAG="${BUILD_VERSION:-$(git describe --always --abbrev=40 --dirty)}"
 GOFLAGS="${GOFLAGS:--mod=vendor}"
-LDFLAGS="${LDFLAGS} -X github.com/rvanderp/vsphere-priv-check/pkg/version.Raw=${GIT_TAG} -X github.com/rvanderp/vsphere-priv-check/pkg/version.Commit=${GIT_COMMIT}"
+LDFLAGS="${LDFLAGS} -X github.com/rvanderp3/vsphere-priv-check/pkg/version.Raw=${GIT_TAG} -X github.com/rvanderp3/vsphere-priv-check/pkg/version.Commit=${GIT_COMMIT}"
 TAGS="${TAGS:-}"
 OUTPUT="${OUTPUT:-bin/vsphere-priv-check}"
 export CGO_ENABLED=0
