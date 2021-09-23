@@ -83,6 +83,8 @@ var (
 		"VirtualMachine.Inventory.CreateFromExisting",
 		"VirtualMachine.Inventory.Delete",
 		"VirtualMachine.Provisioning.Clone",
+		"VirtualMachine.Provisioning.DeployTemplate",
+		"VirtualMachine.Provisioning.MarkAsTemplate",
 		"Folder.Create",
 		"Folder.Delete",
 	}
