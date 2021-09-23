@@ -43,7 +43,7 @@ func runRootCmd(cmd *cobra.Command, args []string) {
 	}
 	log.Printf("folder: %s", rootOpts.checkFolder)
 	log.Printf("checking permissions for user %s\n\n", installConfig.Username)
-	err = util.ValidatePrivileges(ssn, installConfig, rootOpts.checkFolder)
+	err = util.ValidatePrivileges(ssn.Vim25Client, installConfig, rootOpts.checkFolder)
 
 	if err != nil {
 		log.Printf("error while validating required privileges:\n\n%s", err.Error())

@@ -8,6 +8,7 @@ import (
 	pctypes "github.com/rvanderp3/vsphere-priv-check/pkg/types"
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/types"
 	"log"
 	"strings"
@@ -65,13 +66,13 @@ func checkPropagationRequirement(ctx context.Context, authManager *object.Author
 	return nil
 }
 
-func ValidatePrivileges(ssn *Session, p *pctypes.Platform, folder string) error {
+func ValidatePrivileges(client *vim25.Client, p *pctypes.Platform, folder string) error {
 	ctx := context.TODO()
 	var invalidPrivilegeConfiguration = ""
 
-	authManager := object.NewAuthorizationManager(ssn.Vim25Client)
+	authManager := object.NewAuthorizationManager(client)
 
-	finder := find.NewFinder(ssn.Vim25Client)
+	finder := find.NewFinder(client)
 
 	if val, ok := permissions.RequiredPermissions["Datacenter"]; ok {
 		datacenter, err := finder.Datacenter(ctx, p.Datacenter)
@@ -167,7 +168,7 @@ func ValidatePrivileges(ssn *Session, p *pctypes.Platform, folder string) error 
 		}
 	}
 	if val, ok := permissions.RequiredPermissions["vCenter"]; ok {
-		rootFolder := object.NewRootFolder(ssn.Vim25Client)
+		rootFolder := object.NewRootFolder(client)
 		res, err := authManager.FetchUserPrivilegeOnEntities(ctx, []types.ManagedObjectReference{rootFolder.Reference()}, p.Username)
 		if err != nil {
 			return err
