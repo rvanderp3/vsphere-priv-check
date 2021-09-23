@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/davecgh/go-spew/spew"
-	pctypes "github.com/rvanderp/vsphere-perm-check/pkg/types"
+	pctypes "github.com/rvanderp/vsphere-priv-check/pkg/types"
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/ssoadmin"
 	"github.com/vmware/govmomi/sts"
