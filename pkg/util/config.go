@@ -12,16 +12,10 @@ const (
 	installConfig = "install-config.yaml"
 )
 
-// LoadConfig Load configuration from install-config.yaml in the working directory
-func LoadConfig() (*types.Platform, error) {
-	file, err := ioutil.ReadFile(installConfig)
-	if err != nil {
-		return nil, errors.New("unable to read install-config.yaml")
-	}
-
+func LoadConfigFromBytes( config []byte ) (*types.Platform, error) {
 	var vsphereConfig types.Platform
 	var body map[string]interface{}
-	err = yaml.Unmarshal(file, &body)
+	err := yaml.Unmarshal(config, &body)
 	var platform map[string]interface{}
 	if val, ok := body["platform"]; ok {
 		platform = val.(map[string]interface{})
@@ -40,4 +34,13 @@ func LoadConfig() (*types.Platform, error) {
 		return nil, err
 	}
 	return &vsphereConfig, nil
+}
+
+// LoadConfig Load configuration from install-config.yaml in the working directory
+func LoadConfig() (*types.Platform, error) {
+	file, err := ioutil.ReadFile(installConfig)
+	if err != nil {
+		return nil, errors.New("unable to read install-config.yaml")
+	}
+	return LoadConfigFromBytes(file)
 }
